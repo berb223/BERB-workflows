@@ -37,6 +37,10 @@ on:
         description: "GitHub-hosted runner image."
         type: string
         default: "ubuntu-latest"
+      playwright-install:
+        description: "If true, run `playwright install --with-deps chromium` after sync. Required for repos with Playwright-based UI tests."
+        type: boolean
+        default: false
 
 jobs:
   ci:
@@ -51,6 +55,10 @@ jobs:
 
       - name: Sync dependencies
         run: uv sync ${{ inputs.uv-sync-args }}
+
+      - name: Install Playwright browsers
+        if: inputs.playwright-install
+        run: uv run playwright install --with-deps chromium
 
       - name: Lint (ruff check)
         run: uv run ruff check .
