@@ -1,0 +1,65 @@
+name: Python CI (reusable)
+
+# Reusable Python CI for the FTNT/BERB portfolio.
+# Mirrors the inline ci.yml that lived in FTNT-sales-workbench, FTNT-bdm-operations,
+# and BERB-common before consolidation.
+#
+# Usage in a consumer repo's `.github/workflows/ci.yml`:
+#
+#   name: CI
+#   on:
+#     push:
+#       branches: [main]
+#     pull_request:
+#       branches: [main]
+#   jobs:
+#     ci:
+#       uses: berb223/BERB-workflows/.github/workflows/python-ci.yml@v1
+#       with:
+#         mypy-path: src/
+
+on:
+  workflow_call:
+    inputs:
+      mypy-path:
+        description: "Path mypy should type-check (e.g. 'src/' or 'src/berb_common')."
+        type: string
+        default: "src/"
+      uv-sync-args:
+        description: "Extra arguments passed to `uv sync`."
+        type: string
+        default: "--all-extras --dev"
+      pytest-args:
+        description: "Extra arguments passed to `uv run pytest`."
+        type: string
+        default: ""
+      runs-on:
+        description: "GitHub-hosted runner image."
+        type: string
+        default: "ubuntu-latest"
+
+jobs:
+  ci:
+    runs-on: ${{ inputs.runs-on }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync ${{ inputs.uv-sync-args }}
+
+      - name: Lint (ruff check)
+        run: uv run ruff check .
+
+      - name: Format check (ruff format)
+        run: uv run ruff format --check .
+
+      - name: Type check (mypy)
+        run: uv run mypy ${{ inputs.mypy-path }}
+
+      - name: Test
+        run: uv run pytest ${{ inputs.pytest-args }}
