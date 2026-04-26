@@ -18,6 +18,7 @@ Mirrors the inline `ci.yml` that lived in `FTNT-sales-workbench`, `FTNT-bdm-oper
 | `uv-sync-args` | `--all-extras --dev` | Extra args to `uv sync`. |
 | `pytest-args` | _(empty)_ | Extra args to `uv run pytest`. |
 | `runs-on` | `ubuntu-latest` | Runner image. |
+| `playwright-install` | `false` | When `true`, runs `playwright install --with-deps chromium` after sync. Required for repos with Playwright UI tests. |
 
 **Usage** (in `.github/workflows/ci.yml` of any consumer repo):
 
